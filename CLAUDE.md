@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-**CP18** — AI Tool Consolidation & Data-Hygiene Audit Skill. A Claude Desktop / Cowork plugin for solo and small-firm attorneys. One skill (`/ai-tool-audit`) runs a short guided interview on which AI tools the firm uses, for what, and with what data, then produces a data-hygiene audit — flagging data-handling risks and redundant tools, and recommending genuine consolidation candidates onto a governed Claude + MCP stack, mapped to the firm's actual workflows. Specialized tools (practice management, docketing/deadline engines, e-discovery, e-signature) are named to keep just as plainly as tools recommended for consolidation — the skill never pitches a blanket "replace everything with Claude." The attorney (or whoever ran the interview) reviews and confirms the audit before treating it as the firm's current inventory. There is no runtime code, no MCP server, no connector, and no backend. The product is entirely content: a markdown skill file, a rating-rubric reference doc, and JSON manifests.
+**CP11** — Immigration Filing & Status Update Drafting Skill. A Claude Desktop / Cowork plugin for solo and small immigration-practice attorneys. One skill (`/immigration-filing`) drafts filing narrative sections — support letters, cover letters, RFE-response outlines — strictly from attorney-supplied case facts and the firm's own filing templates, and drafts a client status-update email whenever the attorney reports a case-status change. It never looks up a case's status with USCIS, never logs into a USCIS account, and never files, submits, or sends anything itself — every output is a draft for the attorney to review, finalize, and send. There is no runtime code, no MCP server, no connector, and no backend. The product is entirely content: a markdown skill file and a reference doc.
 
-The leak it plugs: firms are accumulating an average of about 18 different AI tools with inconsistent data policies and no single source of truth — a firm rarely has one place that says what it's using, what data touches what, and what's simply duplicated effort. Nothing dedicated addresses this; it's an original angle, not a shrink of an existing tool category. It also positions the wider plugin catalog as "one governed AI system" rather than one more point tool added to the pile — pairs conceptually with the AI Use Policy & Client-Disclosure Generator (CP3) skill in outreach, even though the two ship as separate plugins: this skill audits and recommends a stack, CP3 drafts the actual policy and disclosure clause. If asked to draft a policy itself, this skill declines and states that's outside what it produces — it does not name CP3 by name at runtime, since this skill must not imply a specific sibling product is published and available before it actually is.
+The leak it plugs: immigration attorneys routinely juggle 50 to 200+ pending cases at once, with clients checking in anxiously on status they can't see for themselves, and the narrative drafting behind every filing — support letters, cover letters, RFE responses, plus the client status-update emails each status change generates — eats hours that don't scale with caseload. Immigration-specific hallucination and sanctions risk is elevated in this practice area (fabricated citations and invented facts have already drawn real sanctions attention), which is exactly why this skill drafts strictly from what the attorney supplies and never writes legal argument, cites law, predicts an outcome, or computes a deadline from its own knowledge — the discipline behind that design mirrors the verified-source grounding rule in the catalog's legal-research-memo skill (see PAC-A-3's governance rationale for this track), applied here to filing narrative drafting instead of case-law research.
 
-Landing page: `protomated.com/templates/ai-tool-consolidation-audit/` (WordPress — managed outside this repo).
+Landing page: `protomated.com/templates/immigration-filing-drafter/` (WordPress — managed outside this repo).
 
 ## Repo layout
 
@@ -18,9 +18,9 @@ plugin/           The installable plugin (packaged into .zip bundle)
   .mcp.json                    Empty — filesystem access is Cowork's implicit attached-folder model, not a connector
   manifest.json                Plugin display metadata
   prompts/system-prompt.md     Master system prompt — compliance guardrails live here
-  skills/ai-tool-audit/
-    SKILL.md                   The single skill; YAML frontmatter + markdown body
-    reference/audit-rubric.md  Data-handling rating scale, inventory row format, and interview categories
+  skills/immigration-filing/
+    SKILL.md                              The single skill; YAML frontmatter + markdown body
+    reference/filing-drafting-reference.md Narrative-type structure, status-update trigger categories, and the `[NEEDS: ...]` placeholder convention
 scripts/
   validate-plugin.mjs          Validates plugin/ structure before packing
 docs/
@@ -53,7 +53,7 @@ npm run tree
 
 ## Plugin format
 
-The bundle format is `.zip`. It uses the **plugin variant** (not standalone) — no bundled MCP server, no connectors. Plugin name: `ai-tool-consolidation-audit`, current version: `1.0.0`.
+The bundle format is `.zip`. It uses the **plugin variant** (not standalone) — no bundled MCP server, no connectors. Plugin name: `immigration-filing-drafter`, current version: `1.0.0`.
 
 Two manifests serve different purposes:
 - `plugin/.claude-plugin/plugin.json` — the identity manifest the validator and Claude Desktop read (`name` must be kebab-case)
@@ -64,19 +64,20 @@ The validator (`scripts/validate-plugin.mjs`) checks:
 - Each `skills/*/` subdirectory contains a `SKILL.md`
 - `agents/`, `commands/`, `hooks/` (if present) contain files with the expected extension
 
-## Skill: /ai-tool-audit
+## Skill: /immigration-filing
 
-The single skill runs a short guided interview on the AI tools the firm currently uses, optionally starting from an existing AI-tools list attached to a workspace folder or pasted input, and:
-1. Confirms an attached inventory is complete before treating it as the full list, rather than assuming it is; asks from scratch if there's no existing list.
-2. For each tool, collects what it's used for, who uses it, what data it touches, and its data-handling status as the firm currently understands it — never inferring any of these from the tool's name or category alone.
-3. Rates each tool's data-handling status: 🟢 confirmed appropriate, 🟡 partial/mixed, 🔴 confirmed risk, or ⚪ UNCONFIRMED (the firm doesn't know the tool's current terms) — never guessing a status, and never asserting what a named vendor's terms actually are from its own training knowledge.
-4. Flags redundant tools by workflow — two or more tools serving the same stated task — without assuming overlap automatically means one must be eliminated.
-5. Recommends genuine consolidation candidates onto a governed Claude + MCP stack, each tied to the firm's specific stated workflow and the specific gap found; names tools to keep as specialized (practice management, docketing/deadline engines, e-discovery, e-signature) just as explicitly as tools recommended for consolidation — never a blanket "replace everything."
-6. Never invents an AI-tool inventory, a use case, or a data-handling status the firm didn't report.
-7. Never certifies compliance with any bar rule, ethics opinion, or security standard; never performs or claims a security assessment; never drafts the firm's actual AI-use policy or client-disclosure clause (that's CP3's job, not this skill's) — those are declined or flagged instead of answered.
-8. Never accesses, logs into, changes a setting on, migrates data from, or cancels anything at any vendor — the skill recommends, it does not act.
-9. Presents the full audit with an explicit review invitation — whoever ran the interview confirms it before it's treated as the firm's current inventory.
-10. Iterates on corrections and additions as many times as needed; restates the final findings cleanly when confirmed.
+The single skill drafts two kinds of output, always from what the attorney supplies — case facts and, where relevant, the firm's own filing template, typed into chat or attached as a workspace folder:
+
+1. Confirms which output is needed — a filing narrative section (support letter, cover letter, or RFE-response outline) or a client status-update email — unless it's already clear from what was attached or asked.
+2. **Filing narrative section:** if the firm has its own template, populates its structure with supplied case facts rather than redesigning it; if no template is attached, asks whether the firm has one before falling back to a generic structure, and says plainly when it's using a generic one.
+3. Never invents a case fact — a name, date, relationship, or filing-history detail — not present in the attached case folder or chat input; a missing fact is left as an explicit `[NEEDS: ...]` placeholder, and the rest of the section is still drafted around it.
+4. Never writes the persuasive legal argument for a filing, and never cites a statute, regulation, or case law, from its own knowledge — organizes only the facts and evidence supplied into the structure the firm's template calls for; anything requiring legal-authority content beyond what was supplied is left as `[NEEDS: attorney's legal argument/citation]`.
+5. Never calculates or states a specific USCIS filing or response deadline from general processing rules or an RFE's issue date; a deadline appears only when the attorney states that exact date, otherwise it's flagged for the firm's own docketing/calendaring system to confirm.
+6. **Client status-update email:** drafts a plain-English email from a case-status change the attorney reports — never something the skill looks up or infers itself — and never predicts a case outcome or adds legal characterization beyond what was reported.
+7. Never certifies, assesses, or predicts anything about the case's legal merits, strength, or likelihood of success — that judgment stays with the attorney.
+8. Never accesses, logs into, checks the status of, or submits anything to USCIS, and never sends a client email itself — the skill produces chat text only; the attorney or firm staff files and sends everything.
+9. Presents every draft with the compliance header and footer as chat-level text around it — never embedded inside the copyable draft block, since that block is what the attorney copies straight into a USCIS filing package or a client email.
+10. Iterates on corrections and `[NEEDS: ...]` placeholder fill-ins as many times as needed; never marks a draft "final," "ready to file," or "sent" — that's the attorney's own action.
 
 Each `SKILL.md` has YAML frontmatter:
 ```yaml
@@ -91,23 +92,23 @@ argument-hint: "[hint shown in Claude Desktop]"
 
 These rules are enforced in `prompts/system-prompt.md` and `SKILL.md`. Do not weaken them:
 
-1. **Review gate**: Claude must present every audit and invite confirmation from whoever ran the interview before treating it as current. It never declares an audit final unilaterally.
-2. **No legal or compliance judgment**: the skill never certifies compliance with any bar rule, ethics opinion, or security standard; never opines that current tool use breaches the firm's confidentiality duty; never performs or claims a security assessment (no penetration testing, no independent vendor verification). Findings are flagged for the attorney or ethics counsel to confirm, never resolved by the skill.
-3. **Required output wrapper**: Every skill output must carry the "ASSISTED AI-TOOL AUDIT — ATTORNEY REVIEW REQUIRED BEFORE USE" header and the "Verify before use | Not legal advice" footer (see `prompts/system-prompt.md` for exact text) — both as chat-level text surrounding each audit, never inside an individual finding.
-4. **Plan-tier warning**: The system prompt must warn that consumer-tier Claude (claude.ai Personal / Pro) must not be used for an interview touching the firm's actual AI-tool landscape, and that the interview should describe data categories rather than real client names or matter numbers.
-5. **No facts invented**: The skill must never assert a named vendor's current data-handling terms from its own training knowledge. A tool's status is UNCONFIRMED when the firm doesn't know it, never guessed or asserted from general knowledge.
-6. **Ambiguity resolution**: An attached AI-tools inventory must be confirmed complete before being treated as the full list, never assumed. A tool named without a stated use case is asked about before being rated. A firm reporting no AI tools is asked to reconsider common ones before the skill accepts that and stops, rather than inventing an inventory to audit.
-7. **No external actions**: The skill never accesses, logs into, changes a setting on, migrates data from, or cancels anything at any vendor account, and never carries out its own consolidation recommendation. It produces chat text only — the firm, or a separate engagement, acts on it.
-8. **Scope boundaries, declined not answered**: The skill never drafts the firm's actual AI-use policy or a client-facing AI-disclosure clause (a separate skill's job) and never recommends replacing a genuinely specialized tool — practice management, docketing/deadline engines, e-discovery, e-signature — just because it appears in the inventory alongside general-purpose AI tools. Every consolidation recommendation must cite the firm's own stated workflow and the specific gap found; every "keep" recommendation must name the tool and the reason.
+1. **Review gate**: Claude must present every draft with the compliance header and footer as chat-level text around it, never inside the draft block, and never call a draft "final," "ready to file," or "sent" without the attorney's own action.
+2. **No case-outcome prediction**: the skill never predicts whether a case will be approved, denied, or otherwise resolved favorably, and never assesses how strong a case is — neither in a filing narrative nor in a client status-update email.
+3. **No legal argument or citation from model knowledge**: the skill never writes the persuasive legal argument for a filing, and never cites a statute, regulation, or case law, from its own training knowledge. Anything beyond what the firm's template, case folder, or chat input supplied is left as an explicit `[NEEDS: attorney's legal argument/citation]` placeholder — never filled in from general immigration-law knowledge.
+4. **No deadline calculation**: the skill never computes or states a specific USCIS filing or response deadline from general processing rules or an RFE's issue date. A deadline appears in a draft only when the attorney states that exact date; otherwise it's flagged (`[NEEDS: response deadline — confirm with your docketing system]`) for the firm's own docketing system to confirm.
+5. **No USCIS interaction**: the skill never accesses, logs into, checks the case status of, or submits, files, or sends anything to a USCIS account or system, and never sends a client-facing email itself. A status-update email is drafted only from what the attorney or firm staff reports happened.
+6. **No facts invented**: a case fact — name, date, relationship, filing-history detail, evidence description — not present in the attached case folder or chat input is flagged as `[NEEDS: ...]`, never guessed or filled in with a "typical" case detail.
+7. **Ambiguity resolution**: which draft type is needed is confirmed when unclear; a missing firm template is asked about before the skill falls back to a generic structure; a status-update trigger reported without a stated next step is asked about, not assumed.
+8. **Plan-tier warning**: The system prompt must warn that real case data — A-numbers, dates of birth, immigration or persecution history — should only be used on Claude for Work, Claude Team, or Claude Enterprise, or the Claude API under a signed Data Processing Agreement (DPA), never consumer-tier Claude (claude.ai Personal / Pro).
 
 ## Internal QA fixtures — tests/skills/
 
 `tests/skills/<skill-name>.md` is the internal QA testing guide for a skill — a standing convention for every plugin built in this repo, alongside (not replacing) the end-user testing guide in `plugin/README.md`. The difference:
 
 - `plugin/README.md` — ships inside the plugin zip, short scenarios with pasted one-liners, aimed at an attorney verifying the install.
-- `tests/skills/<skill-name>.md` — internal only, not packaged, uses real attached-folder fixtures under `tests/skills/<skill-name>/` for the attached-inventory path, plus scripted chat answers for the interview-only path. Deeper checks (e.g., compliance-wrapper placement, keep-vs-consolidate outcomes, UNCONFIRMED-status handling, out-of-scope requests) belong here even when they overlap with `plugin/README.md`'s scenarios.
+- `tests/skills/<skill-name>.md` — internal only, not packaged, uses real attached-folder fixtures under `tests/skills/<skill-name>/` for the case-facts-and-template path, since this skill's primary input is an attached case folder, not a single file to read cold. Deeper checks (e.g., compliance-wrapper placement, the `[NEEDS: ...]` placeholder rule, legal-argument and deadline refusal, outcome-prediction refusal) belong here even when they overlap with `plugin/README.md`'s scenarios.
 
-All fixture data must be clearly synthetic — fictional names, firms, matter numbers. Never use real client or matter data, even anonymized real data, without checking with Dele first.
+All fixture data must be clearly synthetic — fictional firms, clients, matter numbers, and A-numbers. Never use real client or matter data, even anonymized real data, without checking with Dele first. This is especially important for this skill: case facts can include A-numbers, dates of birth, and persecution history, so fixture hygiene matters more here than on lower-sensitivity plugins in this catalog.
 
 ## Commit style
 
@@ -117,19 +118,19 @@ Do not include `Co-Authored-By` attribution lines in commit messages.
 
 Used in `plugin/.claude-plugin/plugin.json` and any marketing copy — keep consistent:
 
-> An AI-tool audit assistant that runs a short guided interview on which AI tools your firm uses, for what, and with what data — flagging data-handling risks and redundant tools, and recommending genuine consolidation candidates onto a governed Claude + MCP stack mapped to your firm's actual workflows, for solo and small-firm attorneys managing an average of 18 different AI tools with no single source of truth. Never certifies compliance with any bar rule or security standard, and never accesses, changes, or cancels anything at any vendor; attorney reviews and confirms the audit before treating it as current.
+> An immigration filing drafting assistant that turns attorney-supplied case facts and the firm's own filing templates into narrative filing sections — support letters, cover letters, RFE-response outlines — and client status-update emails triggered by a reported case-status change. Never looks up or submits anything to USCIS, never invents a case fact, never predicts an outcome, and never computes a deadline; you review and finalize every draft before filing or sending.
 
 ## Testing
 
 Testing is manual inside Claude Desktop / Cowork — there is no test runner. The `plugin/README.md` is the canonical testing guide. It contains:
-- Setup steps (build → install → optionally attach a test AI-tools inventory folder → verify skill loads)
+- Setup steps (build → install → optionally attach a test case folder → verify skill loads)
 - 10 specific test inputs with exact text to paste and what to check for each
 
-Key scenarios that must pass: full audit with an existing inventory attached (skill confirms it's complete before proceeding), interview-only with nothing attached, a specialized tool present (skill recommends keeping it, not consolidating it), a confirmed data-handling risk (rated 🔴), an unconfirmed data-handling status (flagged ⚪, never guessed), redundant tools flagged by workflow, a firm reporting no AI tools (skill asks it to reconsider before accepting that), attorney asks for the firm's AI-use policy (skill declines, points to CP3), attorney asks the skill to act on its own recommendation (skill declines — audit and recommendation only), confirmation gate (no audit marked current, nothing at any vendor touched, until confirmed).
+Key scenarios that must pass: a filing narrative drafted from a firm template (populates it, doesn't redesign it), no firm template attached (skill asks before falling back to generic), missing facts flagged as `[NEEDS: ...]` rather than invented, a legal-argument section left as a placeholder rather than drafted from the skill's own knowledge, a deadline never computed, a client status-update email that doesn't predict an outcome or add legal characterization, an outcome-prediction request declined, a USCIS-lookup-or-submission request declined, confirmation gate (nothing marked final/filed/sent until the attorney says so), and a revision loop that fills a placeholder without disturbing the rest of the draft.
 
 ## Notes
 
-- `plugin/.mcp.json` is `{}` — this plugin requires no connector. The interview runs in chat; an optional existing AI-tools inventory comes from Cowork's attached-workspace-folder model, which needs no separate config. Do not add a connector unless the skill explicitly needs one.
+- `plugin/.mcp.json` is `{}` — this plugin requires no connector. Drafting runs in chat, with an optional case folder (case facts and the firm's own filing template) attached via Cowork's implicit attached-workspace-folder model, which needs no separate config.
 - `plugin/manifest.json` has no `server` block — the plugin variant does not require one. Do not add one.
 - `plugin/README.md` and `plugin/CONNECTORS.md` are end-user documentation included in the ZIP bundle; they are not internal developer docs.
 - The root `.mcp.json` is gitignored — it holds workspace-level Claude Code MCP credentials and is not part of the plugin artifact.

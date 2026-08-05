@@ -1,26 +1,26 @@
-# AI Tool Consolidation & Data-Hygiene Audit v1.0.0
+# Immigration Filing & Status Update Drafting Skill v1.0.0
 
 Initial release.
 
 ## What's included
 
-### `/ai-tool-audit` — AI Tool Consolidation & Data-Hygiene Audit
+### `/immigration-filing` — Immigration Filing & Status Update Drafting Skill
 
-A data-hygiene audit assistant for solo and small-firm attorneys managing a growing sprawl of AI tools:
+A filing narrative and status-update drafting assistant for solo and small immigration-practice attorneys:
 
-- **Short guided interview:** the skill asks which AI tools the firm uses, for what workflow, who uses them, and what data they touch — about 10 minutes, with an optional existing AI-tools list to speed it up.
-- **Data-handling rating per tool:** confirmed appropriate, partial/mixed, confirmed risk, or UNCONFIRMED — never a guessed rating dressed up as a confirmed one.
-- **Redundancy flagged by workflow:** tools serving the same stated task are grouped and flagged, without assuming overlap automatically means one has to go.
-- **Consolidation recommendation, tied to real workflows:** every recommendation to consolidate cites the specific workflow and the specific gap found. Genuinely specialized tools — practice management systems, docketing/deadline engines, e-discovery, e-signature — are named explicitly as "keep," not silently folded into a blanket "move everything to Claude" pitch.
-- **No vendor claims from model knowledge:** the skill never asserts what a named tool's current data-handling terms are from its own training data — unconfirmed terms are flagged for the firm to verify with the vendor directly.
-- **Recommends, doesn't act:** the skill never accesses, changes, migrates, or cancels anything at any vendor. Every output is a recommendation for the firm (or a separate engagement) to carry out.
+- **Filing narrative sections:** support letters, cover letters, and RFE-response outlines, drafted by populating your firm's own template with case facts you supply — never a generic structure substituted silently.
+- **Client status-update emails:** a plain-English email drafted from a case-status change you report — no outcome prediction, no added legal characterization.
+- **No facts invented:** any missing fact — a date, a relationship detail, a piece of evidence — is flagged as an explicit `[NEEDS: ...]` placeholder in the draft, never guessed.
+- **No legal argument from model knowledge:** persuasive legal argument and citations to statute, regulation, or case law come only from your firm's template or your own input; anything else is left as a placeholder for you to fill in.
+- **No deadline calculation:** the skill never computes a filing or response deadline from general USCIS processing rules — a deadline appears only when you state the exact date; otherwise it's flagged for your docketing system to confirm.
+- **No USCIS interaction:** no connector, no case-status lookups, no e-filing or submission. A status update is drafted only from what you report happened.
 
-Handles: a firm-wide AI-tool inventory and data-hygiene first pass — the "what are we even using, and is any of it a problem" audit most firms have never had time to do, positioned as one governed system rather than one more point tool to add to the pile.
+Handles: the narrative drafting time behind every immigration filing, and the client status-update emails that come with each case-status change — for firms juggling 50 to 200+ pending matters at once.
 
 ## Setup
 
-Install time: about 5 minutes. Download the zip, drag it into Claude Desktop's Extensions panel. No connectors to authorize. Open a new chat, type `/skills`, and verify `/ai-tool-audit` appears. Optionally attach a workspace folder with an existing AI-tools list before running it.
+Install time: about 5 minutes. Download the zip, drag it into Claude Desktop's Extensions panel. No connectors to authorize. Open a new chat, type `/skills`, and verify `/immigration-filing` appears. Optionally attach a workspace folder with case facts and your firm's own filing template before running it.
 
 ## Compliance
 
-Requires Claude for Work, Claude Team, or Claude Enterprise for any interview touching your firm's actual tool landscape. Every audit carries an "ASSISTED AI-TOOL AUDIT — ATTORNEY REVIEW REQUIRED BEFORE USE" header and footer. The skill is not a security assessment and does not certify compliance with any bar rule, ethics opinion, or security standard; it never invents a tool's data-handling terms; it never drafts the firm's actual AI-use policy (a separate skill); and it never accesses, changes, migrates, or cancels anything at any vendor.
+Requires Claude for Work, Claude Team, or Claude Enterprise (or the Claude API under a signed DPA) before attaching a real case file. Every draft carries an "ASSISTED IMMIGRATION FILING DRAFT — ATTORNEY REVIEW REQUIRED BEFORE FILING OR SENDING" header and footer as chat text around the draft, never inside the copyable draft block. The skill never predicts a case outcome, never writes legal argument or cites law from its own knowledge, never computes a filing deadline, never invents a case fact, and never looks up, files, or sends anything to USCIS or a client.

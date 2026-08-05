@@ -1,19 +1,21 @@
 # Connectors
 
-This plugin requires no MCP connector. The audit runs as a guided interview in chat; if your firm already has an AI-tools list written down, you can optionally attach it as a workspace folder in Claude Desktop / Cowork — no separate authorization step, no credentials.
+This plugin requires no MCP connector. `/immigration-filing` drafts from case facts and your firm's own filing template — typed into chat, or attached as a workspace folder in Claude Desktop / Cowork — no separate authorization step, no credentials.
 
 ## How the plugin reads your files
 
-Cowork's filesystem access is attach-only: the plugin can only see files inside a folder you've explicitly attached to the conversation. It does not browse your computer, does not search beyond that folder, and does not retain access after the conversation ends.
+Cowork's filesystem access is attach-only: the plugin can only see files inside a folder you've explicitly attached to the conversation. It does not browse your computer, does not search beyond that folder, and does not retain access after the conversation ends. It never connects to USCIS, your case-management system, or any other outside service — there is nothing for this plugin to authorize.
 
-To use `/ai-tool-audit`, you don't need to attach anything — the skill will interview you in chat about which AI tools your firm uses. If you'd rather start from a written list, attach a folder containing:
+To use `/immigration-filing`, attach a folder containing:
 
-- An existing AI-tools inventory, in whatever format you have it (a markdown list, a spreadsheet exported as text, notes) — the skill confirms it's complete before treating it as the full inventory, and fills in any missing detail (workflow, data touched, data-handling status) through the interview
+- **Case facts** — petitioner/applicant and beneficiary details, filing type, procedural history, and the specific facts a filing narrative needs. Anything not included is flagged with a `[NEEDS: ...]` placeholder in the draft rather than guessed.
+- **Your firm's own filing template**, for whichever narrative type you need (support letter, cover letter, RFE-response outline) — the skill populates it, it does not redesign it. If you don't attach one, the skill asks whether your firm has one before falling back to a generic structure.
+- For a client status-update email, you don't need to attach anything — just tell the skill what changed in the case, in chat.
 
-The plugin builds a tool inventory, rates each tool's data-handling status, flags redundant tools, and recommends consolidation candidates for your review. It does not log into, change a setting on, migrate data from, or cancel anything at any vendor — you (or a separate Protomated engagement) carry out anything the audit recommends.
+The plugin drafts the requested narrative section or status-update email for your review. It never looks up a case's status, logs into a USCIS account, or files or sends anything itself — you review, finalize, and send every output yourself.
 
 ## Privacy note
 
-The plugin processes your interview answers and any attached inventory file within your Claude Desktop / Cowork conversation under your Claude plan's data handling terms. No tool inventory, data-handling findings, or audit results are transmitted to Protomated or any third party.
+The plugin processes case facts and any attached template files within your Claude Desktop / Cowork conversation under your Claude plan's data handling terms. No case fact, draft, or status update is transmitted to Protomated or any third party.
 
-For your firm's actual AI-tool landscape: confirm you are on Claude for Work, Claude Team, or Claude Enterprise before running this interview, and describe data categories rather than real client names or matter numbers while answering. See the main README for plan requirements.
+Before attaching a real case folder — case facts, A-numbers, dates of birth, immigration or persecution history — confirm you are on Claude for Work, Claude Team, or Claude Enterprise, or using the Claude API under a signed Data Processing Agreement (DPA). See the main README for plan requirements.

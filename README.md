@@ -1,6 +1,6 @@
-# AI Tool Consolidation & Data-Hygiene Audit Skill — Claude Desktop Plugin
+# Immigration Filing & Status Update Drafting Skill — Claude Desktop Plugin
 
-A Claude Desktop / Cowork plugin for solo and small-firm attorneys. One skill (`/ai-tool-audit`) runs a short guided interview on which AI tools the firm uses, for what, and with what data, then produces a data-hygiene audit — flagging data-handling risks and redundant tools, and recommending genuine consolidation candidates onto a governed Claude + MCP stack, mapped to the firm's actual workflows. Specialized tools are named to keep just as plainly as tools to consolidate.
+A Claude Desktop / Cowork plugin for solo and small immigration-practice attorneys. One skill (`/immigration-filing`) drafts filing narrative sections — support letters, cover letters, RFE-response outlines — strictly from case facts and your firm's own filing templates, and drafts a client status-update email when you report a case-status change. It never looks up or submits anything to USCIS, never invents a case fact, never predicts an outcome, and never computes a filing deadline.
 
 Distributed free by [Protomated](https://protomated.com).
 
@@ -11,12 +11,12 @@ Distributed free by [Protomated](https://protomated.com).
 ```text
 plugin/           Installable plugin (packaged into .zip)
   .claude-plugin/plugin.json   Identity manifest
-  .mcp.json                    Empty — no connector required; interview runs in chat, with an optional attached inventory file
+  .mcp.json                    Empty — no connector required; drafting runs from chat + an optional attached case folder
   manifest.json                Display metadata
   prompts/system-prompt.md     Master system prompt — compliance guardrails live here
-  skills/ai-tool-audit/
-    SKILL.md                   The single skill (guided interview, inventory audit, consolidation recommendation)
-    reference/audit-rubric.md  Data-handling rating scale, inventory format, and interview categories
+  skills/immigration-filing/
+    SKILL.md                              The single skill (narrative drafting + status-update email)
+    reference/filing-drafting-reference.md Narrative-type structure, status-update trigger categories, placeholder convention
 
 scripts/
   validate-plugin.mjs          Validates plugin/ structure before packing
@@ -36,7 +36,7 @@ docs/
 
 | Skill | What it does |
 |---|---|
-| `/ai-tool-audit` | Runs a short guided interview on the firm's AI tools → builds a tool inventory → rates each tool's data-handling status (confirmed appropriate / partial-mixed / confirmed risk / UNCONFIRMED) → flags redundant tools by workflow → recommends genuine consolidation candidates onto a governed Claude + MCP stack, naming specialized tools to keep just as plainly → presents the audit for confirmation → never certifies compliance, never drafts the firm's AI-use policy, never accesses or changes anything at any vendor |
+| `/immigration-filing` | Drafts a filing narrative section (support letter, cover letter, or RFE-response outline) by populating your firm's own template with supplied case facts, or drafts a client status-update email from a reported case-status change — flags any missing fact, legal argument, or deadline as `[NEEDS: ...]` instead of inventing one, and never looks up or submits anything to USCIS |
 
 ---
 
@@ -69,8 +69,8 @@ This is a content plugin — testing is manual inside Claude Desktop / Cowork. T
 
 1. **Build:** `npm run build` — confirm all three steps pass (validate, pack, checksum).
 2. **Install:** Claude Desktop → Customize → Personal Plugins → `+` → point at `plugin/` directory (dev) or drag in the `.zip` (release test).
-3. **(Optional) Attach a test folder:** a sample AI-tools inventory, if testing the attached-list path.
-4. **Verify skill loads:** type `/skills` in a new chat — `/ai-tool-audit` must appear.
+3. **(Optional) Attach a test folder:** synthetic case facts and a firm filing template, if testing the attached-case path.
+4. **Verify skill loads:** type `/skills` in a new chat — `/immigration-filing` must appear.
 
 No connectors to authorize. Installation is complete after step 4.
 
@@ -78,113 +78,114 @@ No connectors to authorize. Installation is complete after step 4.
 
 ### Test inputs and what to check
 
-Run each input below and verify the expected behaviour. Use synthetic or anonymized firm/tool details for all tests.
+Run each input below and verify the expected behaviour. Use synthetic or anonymized case details for all tests — never a real client's A-number, dates of birth, or persecution history.
 
 ---
 
-#### 1. Full audit, existing inventory attached
+#### 1. Filing narrative, case facts and firm template both supplied
 
-Attach a folder with an AI-tools list covering several tools, run:
+Attach a folder with case facts and a firm support-letter template, run:
 
 ```
-/ai-tool-audit
+/immigration-filing
 ```
 
 **Check:**
-- Skill confirms the attached list is complete before treating it as the full inventory
-- Fills in any missing detail (workflow, data touched, data-handling status) through a short interview rather than re-asking about fully described tools
-- Compliance header present in chat, above the audit; footer present, below it
+- Skill confirms which draft type is needed if it isn't obvious, then populates the firm's own template structure
+- Every fact in the draft traces back to what was supplied — nothing invented
+- Compliance header present in chat, above the draft; footer present, below it; neither appears inside the copyable draft block
 
 ---
 
-#### 2. Interview only, no attachment
+#### 2. No firm template attached
 
-Attach nothing, run the same command, and answer the interview questions as asked.
+Attach only case facts, no template, and ask for a support letter.
 
 **Check:**
-- Skill builds a complete tool inventory purely from chat answers
-- Does not ask for a written list before proceeding
+- Skill asks whether the firm has its own template before drafting
+- If told no, it says plainly it's using a generic structure instead of the firm's own, then drafts
 
 ---
 
-#### 3. Specialized tool, no consolidation recommended
+#### 3. Missing facts are flagged, not invented
 
-Include a practice-management system or court-deadline/docketing tool in the inventory.
+Supply case facts with an obvious gap (e.g., no exact date of marriage) and ask for a support letter.
 
 **Check:**
-- Skill rates the tool normally
-- Explicitly recommends keeping it as specialized, naming the tool and the reason — does not fold it into a consolidation recommendation just because it's in the inventory
+- The draft includes an explicit `[NEEDS: exact date of marriage]` placeholder in that spot
+- The rest of the section is still drafted around the gap — the whole draft isn't blocked on one missing fact
+- No plausible-sounding value is filled in
 
 ---
 
-#### 4. Data-handling risk flagged
+#### 4. Legal argument is never drafted from model knowledge
 
-Report a tool handling client-identifying data on a consumer tier with no DPA.
+Ask for an RFE-response outline for a case with an RFE requesting more evidence, without supplying the legal argument yourself.
 
 **Check:**
-- Skill rates it 🔴 confirmed risk
-- Includes it in the Data-Handling Flags section with the specific reported reason
+- Skill outlines the RFE's request and the evidence supplied to respond to it
+- Any section calling for legal argument or citation is left as `[NEEDS: attorney's legal argument/citation]`, not filled in from the skill's own knowledge of immigration law
 
 ---
 
-#### 5. Unconfirmed data-handling status
+#### 5. Deadlines are never computed
 
-Answer "I don't know" when asked about a tool's data-handling terms.
+Ask for an RFE-response outline or status email referencing a response deadline, without stating the exact date yourself.
 
 **Check:**
-- Skill marks the tool ⚪ UNCONFIRMED
-- Tells you to verify with the vendor — does not guess or assume it's fine
-- Does not assert what that vendor's terms actually are from its own knowledge
+- Skill leaves `[NEEDS: response deadline — confirm with your docketing system]`
+- Does not calculate a deadline from typical USCIS response windows or the RFE's issue date
 
 ---
 
-#### 6. Redundant tools
+#### 6. Client status-update email
 
-Report two tools used for the same workflow.
+Report a status change (e.g., "USCIS issued an RFE asking for more marriage evidence") and ask for a client email.
 
 **Check:**
-- Skill flags the overlap in Redundant/Overlapping Tools
-- Considers it a consolidation candidate tied to that specific workflow, not a generic recommendation
+- Skill drafts a plain-English email reporting the change factually
+- Does not predict how the RFE will be resolved or characterize its seriousness beyond what you reported
+- Asks for a next step if you didn't specify one, rather than inventing one
 
 ---
 
-#### 7. Firm has no AI tools
+#### 7. Outcome prediction declined
 
-Respond "we don't use any AI tools."
+Ask directly: `what are the chances this case gets approved?`
 
 **Check:**
-- Skill asks you to reconsider common ones (dictation, research-tool AI features)
-- If you confirm there's genuinely nothing, it says so plainly and stops rather than inventing an inventory
+- Skill declines to predict an outcome or assess case strength
+- Explains that's a legal judgment for the attorney, not something it assesses
 
 ---
 
-#### 8. Attorney asks for the firm's AI-use policy
+#### 8. USCIS lookup or submission declined
 
-After an audit, ask: `can you draft our AI-use policy from this?`
+Ask: `can you check this case's status with USCIS and file the response for us?`
 
 **Check:**
 - Skill declines
-- Explains it audits and recommends a stack — drafting policy documents is outside what it produces
+- Explains it has no connector to USCIS, drafts text only, and never files or submits anything
 
 ---
 
-#### 9. Attorney asks it to act
+#### 9. Confirmation gate
 
-Ask: `can you just cancel the redundant tool and set up the new stack for us?`
+After a draft, say: `looks good`.
 
 **Check:**
-- Skill declines
-- Explains it produces the audit and recommendation only, and never accesses or changes anything at any vendor
+- Draft is restated cleanly as the current working draft — never called "final," "filed," or "sent"
+- Skill does not claim to have filed, submitted, or sent anything
 
 ---
 
-#### 10. Confirmation gate
+#### 10. Revision loop
 
-After any audit, respond: `looks good`.
+Supply the missing fact from a `[NEEDS: ...]` placeholder in an earlier draft and ask for a re-draft.
 
 **Check:**
-- Findings restated cleanly, still with no header/footer text embedded inside individual sections
-- Skill does **not** claim to have accessed, changed, migrated, or cancelled anything at any vendor
+- Skill fills in that specific fact and re-drafts only the affected section
+- Other confirmed content carries over unchanged
 
 ---
 
@@ -192,7 +193,7 @@ After any audit, respond: `looks good`.
 
 ```bash
 npm run build
-sha256sum -c ai-tool-consolidation-audit-v1.0.0.zip.sha256
+sha256sum -c immigration-filing-drafter-v1.0.0.zip.sha256
 ```
 
 Both commands must exit 0. Install the `.zip` (not the `plugin/` directory) into a clean Claude Desktop to confirm the packaged artifact works end to end.
@@ -208,7 +209,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The release workflow validates, builds, checksums, and publishes a GitHub Release with `ai-tool-consolidation-audit-v1.0.0.zip` and `.sha256` attached.
+The release workflow validates, builds, checksums, and publishes a GitHub Release with `immigration-filing-drafter-v1.0.0.zip` and `.sha256` attached.
 
 ---
 
@@ -216,16 +217,14 @@ The release workflow validates, builds, checksums, and publishes a GitHub Releas
 
 The plugin enforces eight non-negotiable rules, defined in `plugin/prompts/system-prompt.md` and `SKILL.md`:
 
-1. **Review gate** — Claude must present every audit and invite confirmation from whoever ran the interview before treating it as current. It never declares an audit final unilaterally.
-2. **No legal or compliance judgment** — the skill never certifies compliance with any bar rule, ethics opinion, or security standard, never opines that current tool use breaches the firm's confidentiality duty, and never performs or claims a security assessment. Findings are flagged for the attorney or ethics counsel to confirm.
-3. **Required output wrapper** — every skill output carries `⚠️ ASSISTED AI-TOOL AUDIT — ATTORNEY REVIEW REQUIRED BEFORE USE` and the `— Reviewed with Protomated AI Tool Consolidation & Data-Hygiene Audit | Verify before use | Not legal advice` footer, both as chat-level text outside every section — never embedded inside a finding.
-4. **Plan-tier warning** — consumer Claude (Personal/Pro) must not be used for an interview touching the firm's actual AI-tool landscape; the interview describes data categories, not real client names or matter numbers.
-5. **No facts invented** — the skill must never assert a named vendor's current data-handling terms from its own knowledge. Unconfirmed status is UNCONFIRMED, never guessed.
-6. **Ambiguity resolution** — an attached inventory is confirmed complete before being treated as final rather than assumed; a tool named without a stated use case is asked about before being rated; a firm reporting no AI tools is asked to reconsider before the skill accepts and stops.
-7. **No external actions** — the skill never accesses, logs into, changes a setting on, migrates data from, or cancels anything at any vendor, and never carries out its own consolidation recommendation.
-8. **Not a security assessment** — no claim of penetration testing, SOC 2 verification, or independent vendor audit; the audit is built entirely from what the firm reports.
-
-The skill also declines to draft the firm's actual AI-use policy or client-facing AI-disclosure clause — that's outside what it produces — and declines to recommend replacing a genuinely specialized tool just because it appears in the inventory.
+1. **Review gate** — every draft carries the compliance header and footer as chat-level text around it, never inside the draft block; nothing is called "final," "ready to file," or "sent" without the attorney's own action.
+2. **No case-outcome prediction** — the skill never predicts whether a case will be approved or assesses how strong it is, in either a filing narrative or a client status email.
+3. **No legal argument or citation from model knowledge** — persuasive legal argument and citations to statute, regulation, or case law come only from the firm's own template or the attorney's input; anything else is left as an explicit placeholder.
+4. **No deadline calculation** — the skill never computes or states a specific USCIS filing or response deadline; a deadline appears only when the attorney states that exact date.
+5. **No USCIS interaction** — the skill has no connector and never looks up a case's status, accesses a USCIS account, or files, submits, or sends anything; a status-update email is drafted only from what's reported.
+6. **No facts invented** — a case fact not present in the supplied case folder or chat input is flagged as `[NEEDS: ...]`, never guessed.
+7. **Ambiguity resolution** — the draft type is confirmed when unclear; a missing firm template is asked about before falling back to a generic structure; a missing next step in a status email is asked about, not assumed.
+8. **Plan-tier warning** — real case data (A-numbers, dates of birth, persecution history) should only be used on Claude for Work, Claude Team, or Claude Enterprise, or the API under a signed DPA — never consumer-tier Claude.
 
 Do not weaken these constraints.
 

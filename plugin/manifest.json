@@ -1,16 +1,16 @@
 {
   "manifest_version": "0.2",
-  "name": "ai-tool-consolidation-audit",
-  "display_name": "AI Tool Consolidation & Data-Hygiene Audit Skill",
+  "name": "immigration-filing-drafter",
+  "display_name": "Immigration Filing & Status Update Drafting Skill",
   "version": "1.0.0",
-  "description": "One skill: /ai-tool-audit. Run a short guided interview on which AI tools your firm uses, for what, and with what data; the skill builds a tool inventory, rates each tool's data-handling status, flags redundant tools by workflow, and recommends genuine consolidation candidates onto a governed Claude + MCP stack — naming what should stay specialized just as plainly as what should consolidate. Assisted audit, always reviewed — never certifies compliance with any bar rule or security standard, and never accesses, changes, or cancels anything at any vendor.",
+  "description": "One skill: /immigration-filing. Provide case facts and your firm's own filing templates; the skill drafts narrative filing sections (support letters, cover letters, RFE-response outlines) strictly from what's supplied, and drafts a client status-update email when you report a status change. Assisted draft, always reviewed — never looks up or submits anything to USCIS, never invents a fact, never predicts an outcome, never computes a deadline.",
   "author": {
     "name": "Protomated",
     "url": "https://protomated.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/protomated/claude-ai-tool-consolidation-audit"
+    "url": "https://github.com/protomated/claude-immigration-filing-drafter"
   },
   "license": "MIT"
 }

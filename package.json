@@ -1,7 +1,7 @@
 {
-  "name": "ai-tool-consolidation-audit",
+  "name": "immigration-filing-drafter",
   "version": "1.0.0",
-  "description": "AI Tool Consolidation & Data-Hygiene Audit — Claude Desktop plugin that interviews a firm on its AI tool usage and produces an audit flagging data-handling risks and redundant tools, and recommending consolidation candidates onto a governed Claude + MCP stack, for solo and small-firm attorneys",
+  "description": "Immigration Filing & Status Update Drafting Skill — Claude Desktop plugin that drafts filing narrative sections and client status-update emails from attorney-supplied case facts and the firm's own templates, for solo and small immigration-practice attorneys",
   "private": true,
   "scripts": {
     "validate": "node scripts/validate-plugin.mjs plugin",

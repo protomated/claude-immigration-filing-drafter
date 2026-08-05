@@ -1,7 +1,7 @@
 {
-  "name": "ai-tool-consolidation-audit",
+  "name": "immigration-filing-drafter",
   "version": "1.0.0",
-  "description": "An AI-tool audit assistant that runs a short guided interview on which AI tools your firm uses, for what, and with what data — flagging data-handling risks and redundant tools, and recommending genuine consolidation candidates onto a governed Claude + MCP stack, mapped to your firm's actual workflows. Never certifies compliance with any bar rule or security standard, and never accesses or changes anything at any vendor; you review and confirm the audit before treating it as current.",
+  "description": "An immigration filing drafting assistant that turns attorney-supplied case facts and the firm's own filing templates into narrative filing sections — support letters, cover letters, RFE-response outlines — and client status-update emails triggered by a reported case-status change. Never looks up or submits anything to USCIS, never invents a case fact, never predicts an outcome, and never computes a deadline; you review and finalize every draft before filing or sending.",
   "author": {
     "name": "Protomated"
   }
