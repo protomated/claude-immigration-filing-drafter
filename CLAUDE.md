@@ -10,9 +10,29 @@ The leak it plugs: immigration attorneys routinely juggle 50 to 200+ pending cas
 
 Landing page: `protomated.com/templates/immigration-filing-drafter/` (WordPress — managed outside this repo).
 
+## Working a new ticket (this repo is a per-ticket template)
+
+This repo is not owned by any single ticket — it's reused for every plugin in the PAC catalog. Each new build **replaces the current plugin's content in place**, same repo, same git history, no "repo is now for ticket X" migration. **Never write the word "replace" (or otherwise describe the swap) in a commit message, README, RELEASE.md, or code comment.** Every build should read as if it were authored fresh for its own ticket, not as a diff against whatever was here before. There is also an invocable `/work-pac-ticket` skill (`.claude/skills/work-pac-ticket/`) that runs this recipe end to end for a given ticket number.
+
+**Starting a ticket:**
+
+1. Look up the ticket in Nifty — project niceId `PAC` (project id `FivxoeVG9E`). Fetch the ticket by `niceId`, then its parent epic (`parentTaskId`, normally PAC-61) and any linked/dependency tasks — a single ticket's description is often incomplete without the epic's framing.
+2. Read the three fixed reference docs before drafting anything; they don't change per ticket: `docs/NTC-A-1.md` (n8n track onboarding — shared pillar/leak-test framing), `docs/PAC-A-3.md` (Claude plugin track onboarding — the "assisted draft, always reviewed" rule this whole catalog runs on), and `docs/how-to-add-a-new-lead-magnet-template.md` (how the landing page gets published afterward, and why the build format decides the compliance note).
+3. Confirm the ticket's plugin name, skill slug, and CP number (from the ticket title/custom fields) with the user before rewriting if any of them are ambiguous — don't guess.
+4. If the ticket description or comments point at another catalog plugin for shared design rationale, resolve it — however it's referenced: an explicit `PAC-N`; a CP-number shorthand ("CP7," "C7" — every ticket title in this catalog follows `CP<N>: <Display Name>`, searchable via Nifty full-text search scoped to this project when only the shorthand or name is given); or just the plugin's name with no number at all. Once resolved to a PAC-N, read its `Plugin Repo/Marketplace URL` custom field, or ask the user for that ticket's repo URL/path if the field is empty or the search is ambiguous. Judge incidental mentions (a doc citation, a "replaces X" note) separately — those don't need resolving. Treat whatever you do pull in as read-only research — never a dependency, submodule, or copied file in this repo.
+
+**What gets rewritten vs. left alone:**
+
+Rewritten per ticket: the ticket-specific sections of this file (`What this repo is` above, and the skill/compliance sections below — keep sections like this one and "Commit style"), root `README.md`, `RELEASE.md`, `package.json`, `plugin/.claude-plugin/plugin.json`, `plugin/manifest.json`, `plugin/CONNECTORS.md`, `plugin/README.md`, `plugin/prompts/system-prompt.md`, `plugin/skills/<old-slug>/` → `plugin/skills/<new-slug>/` (delete the old directory rather than leaving both), `tests/skills/<old-slug>.md` + its fixture folder → `tests/skills/<new-slug>.md` + fixtures, `.github/workflows/release.yml` (zip filename + release title).
+
+Left alone: `plugin/LICENSE`, root `LICENSE`, `docs/NTC-A-1.md`, `docs/PAC-A-3.md`, `docs/how-to-add-a-new-lead-magnet-template.md`, `.github/workflows/validate.yml`, `.claude/skills/`.
+
+**Before committing:** run `npm run clean && npm run build` — it should validate, pack, and checksum cleanly — then grep the tree for the previous plugin's name/slug/skill terminology to catch anything left behind. Once the user confirms the build is ready, commit as a single `Build PAC-<N> CP<M>: <Display Name> Skill plugin` commit per "Commit style" below — same standing rule as everywhere else in this project: don't commit unless the user has asked for it. Do not push, tag, or run `npm run release` without the user's explicit go-ahead either.
+
 ## Repo layout
 
 ```
+.claude/skills/work-pac-ticket/SKILL.md   Runs "Working a new ticket" above end to end — stable, not rewritten per ticket
 plugin/           The installable plugin (packaged into .zip bundle)
   .claude-plugin/plugin.json   Manifest validated by scripts/validate-plugin.mjs
   .mcp.json                    Empty — filesystem access is Cowork's implicit attached-folder model, not a connector
