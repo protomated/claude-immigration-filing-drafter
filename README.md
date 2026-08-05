@@ -202,12 +202,16 @@ Both commands must exit 0. Install the `.zip` (not the `plugin/` directory) into
 
 ## Cutting a release
 
-Update `RELEASE.md` at the repo root, then push a semver tag — CI does the rest:
+Update `RELEASE.md` at the repo root, then either push a semver tag or trigger the workflow manually — CI does the rest either way.
+
+**Tag push:**
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
+
+**Manual trigger:** GitHub → Actions → **Release** → Run workflow → enter the version (e.g. `1.0.0`). The version must match `package.json`'s `version` field or the run fails before building.
 
 The release workflow validates, builds, checksums, and publishes a GitHub Release with `immigration-filing-drafter-v1.0.0.zip` and `.sha256` attached.
 
