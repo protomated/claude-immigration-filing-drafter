@@ -1,6 +1,6 @@
-# Immigration Filing & Status Update Drafting Skill v1.0.0
+# Immigration Filing & Status Update Drafting Skill v1.0.1
 
-Initial release.
+Adds Legal Builder Hub freshness frontmatter (`freshness_category: regulatory`, 6-month window — immigration is a fast-moving domain, though this skill bundles no citable external law itself). No functional changes.
 
 ## What's included
 

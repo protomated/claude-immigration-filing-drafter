@@ -2,6 +2,9 @@
 name: immigration-filing
 description: Draft immigration filing narrative sections — support letters, cover letters, RFE-response outlines — strictly from attorney-supplied case facts and the firm's own filing templates, and draft a client status-update email when the attorney reports a case-status change. Never looks up or submits anything to USCIS, never invents a case fact, never predicts an outcome, and never computes a filing deadline.
 argument-hint: "[optional: attach a case folder with case facts and the firm's own filing template — the skill asks for what's missing either way]"
+last_verified: 2026-09-29
+freshness_window: 6 months
+freshness_category: regulatory
 ---
 
 # /immigration-filing — Immigration Filing & Status Update Drafting Skill
