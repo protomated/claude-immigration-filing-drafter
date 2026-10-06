@@ -19,3 +19,7 @@ The plugin drafts the requested narrative section or status-update email for you
 The plugin processes case facts and any attached template files within your Claude Desktop / Cowork conversation under your Claude plan's data handling terms. No case fact, draft, or status update is transmitted to Protomated or any third party.
 
 Before attaching a real case folder — case facts, A-numbers, dates of birth, immigration or persecution history — confirm you are on Claude for Work, Claude Team, or Claude Enterprise, or using the Claude API under a signed Data Processing Agreement (DPA). See the main README for plan requirements.
+
+## Using this in ChatGPT Desktop
+
+This skill also works in ChatGPT Desktop. There's no Filesystem connector to attach there — instead, attach your case facts and firm template directly to the conversation before running the skill.

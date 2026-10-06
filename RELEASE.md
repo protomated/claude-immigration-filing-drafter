@@ -1,6 +1,6 @@
-# Immigration Filing & Status Update Drafting Skill v1.0.1
+# Immigration Filing & Status Update Drafting Skill
 
-Adds Legal Builder Hub freshness frontmatter (`freshness_category: regulatory`, 6-month window — immigration is a fast-moving domain, though this skill bundles no citable external law itself). No functional changes.
+Confirmed working in ChatGPT Desktop in addition to Claude Desktop — attach files directly to the conversation since ChatGPT has no Filesystem connector. Removed the hardcoded "(Claude Desktop)" wording from the skill's own output footer.
 
 ## What's included
 

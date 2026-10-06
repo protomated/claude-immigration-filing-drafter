@@ -1,6 +1,6 @@
 {
   "name": "immigration-filing-drafter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Immigration Filing & Status Update Drafting Skill — Claude Desktop plugin that drafts filing narrative sections and client status-update emails from attorney-supplied case facts and the firm's own templates, for solo and small immigration-practice attorneys",
   "private": true,
   "scripts": {
