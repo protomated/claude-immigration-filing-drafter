@@ -5,10 +5,10 @@
   "private": true,
   "scripts": {
     "validate": "node scripts/validate-plugin.mjs plugin",
-    "pack": "rm -f /tmp/$npm_package_name.zip && (cd plugin && zip -r /tmp/$npm_package_name.zip . -x '*.DS_Store' 'node_modules/*' '*/node_modules/*' 'package-lock.json') && mv /tmp/$npm_package_name.zip ./$npm_package_name-v$npm_package_version.zip",
-    "checksum": "sha256sum $npm_package_name-v$npm_package_version.zip | tee $npm_package_name-v$npm_package_version.zip.sha256",
+    "pack": "rm -f /tmp/$npm_package_name.zip && (cd plugin && zip -r /tmp/$npm_package_name.zip . -x '*.DS_Store' 'node_modules/*' '*/node_modules/*' 'package-lock.json') && mv /tmp/$npm_package_name.zip ./$npm_package_name.zip",
+    "checksum": "sha256sum $npm_package_name.zip | tee $npm_package_name.zip.sha256",
     "build": "npm run validate && npm run pack && npm run checksum",
-    "release": "npm run build && gh release create v$npm_package_version $npm_package_name-v$npm_package_version.zip $npm_package_name-v$npm_package_version.zip.sha256 --title \"v$npm_package_version\" --notes-file RELEASE.md",
+    "release": "npm run build && gh release create v$npm_package_version $npm_package_name.zip $npm_package_name.zip.sha256 --title \"v$npm_package_version\" --notes-file RELEASE.md",
     "clean": "rm -f ./*.zip ./*.zip.sha256",
     "tree": "find plugin -type f -not -path '*/node_modules/*' | sort"
   }
